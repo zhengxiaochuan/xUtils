@@ -25,8 +25,9 @@ import com.lidroid.xutils.http.client.HttpGetCache;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.lidroid.xutils.http.client.RequestParams;
 import com.lidroid.xutils.http.client.ResponseStream;
-import com.lidroid.xutils.http.client.callback.DownloadRedirectHandler;
+import com.lidroid.xutils.http.client.callback.HttpRedirectHandler;
 import com.lidroid.xutils.http.client.entity.GZipDecompressingEntity;
+import com.lidroid.xutils.util.core.SimpleSSLSocketFactory;
 import org.apache.http.*;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
@@ -61,7 +62,7 @@ public class HttpUtils {
     private final DefaultHttpClient httpClient;
     private final HttpContext httpContext = new BasicHttpContext();
 
-    private DownloadRedirectHandler downloadRedirectHandler;
+    private HttpRedirectHandler httpRedirectHandler;
 
     public HttpUtils() {
         this(HttpUtils.DEFAULT_CONN_TIMEOUT);
@@ -83,7 +84,7 @@ public class HttpUtils {
 
         SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-        schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+        schemeRegistry.register(new Scheme("https", SimpleSSLSocketFactory.getSocketFactory(), 443));
 
         httpClient = new DefaultHttpClient(new ThreadSafeClientConnManager(params, schemeRegistry), params);
 
@@ -122,13 +123,13 @@ public class HttpUtils {
 
     private String defaultResponseTextCharset = HTTP.UTF_8;
 
-    private long currRequestExpiry = HttpGetCache.getDefaultExpiryTime();
+    private long currentRequestExpiry = HttpGetCache.getDefaultExpiryTime();
 
     private final static int DEFAULT_CONN_TIMEOUT = 1000 * 15; // 15s
 
     private final static int DEFAULT_RETRY_TIMES = 5;
 
-    private final static int HTTP_THREAD_POOL_SIZE = 3;
+    private final static int DEFAULT_THREAD_POOL_SIZE = 3;
 
     private static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
     private static final String ENCODING_GZIP = "gzip";
@@ -143,7 +144,7 @@ public class HttpUtils {
         }
     };
 
-    private static final Executor executor = Executors.newFixedThreadPool(HTTP_THREAD_POOL_SIZE, sThreadFactory);
+    private static Executor executor = Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE, sThreadFactory);
 
     public HttpClient getHttpClient() {
         return this.httpClient;
@@ -163,19 +164,19 @@ public class HttpUtils {
         return this;
     }
 
-    public HttpUtils configDownloadRedirectHandler(DownloadRedirectHandler downloadRedirectHandler) {
-        this.downloadRedirectHandler = downloadRedirectHandler;
+    public HttpUtils configHttpRedirectHandler(HttpRedirectHandler httpRedirectHandler) {
+        this.httpRedirectHandler = httpRedirectHandler;
         return this;
     }
 
-    public HttpUtils configHttpGetCacheDefaultExpiry(long defaultExpiry) {
+    public HttpUtils configDefaultHttpGetCacheExpiry(long defaultExpiry) {
         HttpGetCache.setDefaultExpiryTime(defaultExpiry);
-        currRequestExpiry = HttpGetCache.getDefaultExpiryTime();
+        currentRequestExpiry = HttpGetCache.getDefaultExpiryTime();
         return this;
     }
 
-    public HttpUtils configCurrRequestExpiry(long currRequestExpiry) {
-        this.currRequestExpiry = currRequestExpiry;
+    public HttpUtils configCurrentHttpGetCacheExpiry(long currRequestExpiry) {
+        this.currentRequestExpiry = currRequestExpiry;
         return this;
     }
 
@@ -203,8 +204,13 @@ public class HttpUtils {
         return this;
     }
 
-    public HttpUtils configRequestExecutionRetryCount(int count) {
+    public HttpUtils configRequestRetryCount(int count) {
         this.httpClient.setHttpRequestRetryHandler(new RetryHandler(count));
+        return this;
+    }
+
+    public HttpUtils configRequestThreadPoolSize(int threadPoolSize) {
+        this.executor = Executors.newFixedThreadPool(threadPoolSize, sThreadFactory);
         return this;
     }
 
@@ -273,8 +279,8 @@ public class HttpUtils {
 
         HttpHandler<File> handler = new HttpHandler<File>(httpClient, httpContext, defaultResponseTextCharset, callback);
 
-        handler.setExpiry(currRequestExpiry);
-        handler.setDownloadRedirectHandler(downloadRedirectHandler);
+        handler.setExpiry(currentRequestExpiry);
+        handler.setHttpRedirectHandler(httpRedirectHandler);
         request.setRequestParams(params, handler);
 
         handler.executeOnExecutor(executor, request, target, autoResume, autoRename);
@@ -289,8 +295,8 @@ public class HttpUtils {
 
         HttpHandler<T> handler = new HttpHandler<T>(httpClient, httpContext, defaultResponseTextCharset, callBack);
 
-        handler.setExpiry(currRequestExpiry);
-        handler.setDownloadRedirectHandler(downloadRedirectHandler);
+        handler.setExpiry(currentRequestExpiry);
+        handler.setHttpRedirectHandler(httpRedirectHandler);
         request.setRequestParams(params, handler);
 
         handler.executeOnExecutor(executor, request);
@@ -304,8 +310,8 @@ public class HttpUtils {
 
         SyncHttpHandler handler = new SyncHttpHandler(httpClient, httpContext, defaultResponseTextCharset);
 
-        handler.setExpiry(currRequestExpiry);
-        handler.setDownloadRedirectHandler(downloadRedirectHandler);
+        handler.setExpiry(currentRequestExpiry);
+        handler.setHttpRedirectHandler(httpRedirectHandler);
         request.setRequestParams(params);
 
         return handler.sendRequest(request);

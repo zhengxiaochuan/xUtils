@@ -17,6 +17,9 @@ package com.lidroid.xutils.bitmap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.animation.Animation;
 import com.lidroid.xutils.bitmap.callback.ImageLoadCallBack;
@@ -24,32 +27,32 @@ import com.lidroid.xutils.bitmap.callback.SimpleImageLoadCallBack;
 
 public class BitmapDisplayConfig {
 
-    private static final Bitmap TRANSPARENT_BITMAP = Bitmap.createBitmap(50, 50, Bitmap.Config.ALPHA_8);
-
     private int bitmapMaxWidth = 0;
     private int bitmapMaxHeight = 0;
 
     private Animation animation;
 
-    private Bitmap loadingBitmap = TRANSPARENT_BITMAP;
-    private Bitmap loadFailedBitmap;
+    private Drawable loadingDrawable;
+    private Drawable loadFailedDrawable;
 
     private ImageLoadCallBack imageLoadCallBack;
 
     private boolean showOriginal = false;
 
-    private Bitmap.Config bitmapConfig = Bitmap.Config.ARGB_4444;
+    private Bitmap.Config bitmapConfig = Bitmap.Config.RGB_565;
 
     private Context mContext;
+
+    private static final Drawable TRANSPARENT_DRAWABLE = new ColorDrawable(Color.TRANSPARENT);
 
     public BitmapDisplayConfig(Context context) {
         mContext = context;
     }
 
     public int getBitmapMaxWidth() {
-        if (bitmapMaxWidth == 0) {// default max width = screen_width/2
+        if (bitmapMaxWidth == 0) {// default max width = screen_width/3
             DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
-            bitmapMaxWidth = (int) Math.floor(displayMetrics.widthPixels / 2);
+            bitmapMaxWidth = (int) Math.floor(displayMetrics.widthPixels / 3);
             bitmapMaxHeight = bitmapMaxHeight == 0 ? bitmapMaxWidth : bitmapMaxHeight;
         }
         return bitmapMaxWidth;
@@ -60,9 +63,9 @@ public class BitmapDisplayConfig {
     }
 
     public int getBitmapMaxHeight() {
-        if (bitmapMaxHeight == 0) {// default max height = screen_width/2
+        if (bitmapMaxHeight == 0) {// default max height = screen_width/3
             DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
-            bitmapMaxHeight = (int) Math.floor(displayMetrics.widthPixels / 2);
+            bitmapMaxHeight = (int) Math.floor(displayMetrics.widthPixels / 3);
             bitmapMaxWidth = bitmapMaxWidth == 0 ? bitmapMaxHeight : bitmapMaxWidth;
         }
         return bitmapMaxHeight;
@@ -80,20 +83,20 @@ public class BitmapDisplayConfig {
         this.animation = animation;
     }
 
-    public Bitmap getLoadingBitmap() {
-        return loadingBitmap;
+    public Drawable getLoadingDrawable() {
+        return loadingDrawable == null ? TRANSPARENT_DRAWABLE : loadingDrawable;
     }
 
-    public void setLoadingBitmap(Bitmap loadingBitmap) {
-        this.loadingBitmap = loadingBitmap;
+    public void setLoadingDrawable(Drawable loadingDrawable) {
+        this.loadingDrawable = loadingDrawable;
     }
 
-    public Bitmap getLoadFailedBitmap() {
-        return loadFailedBitmap;
+    public Drawable getLoadFailedDrawable() {
+        return loadFailedDrawable == null ? TRANSPARENT_DRAWABLE : loadFailedDrawable;
     }
 
-    public void setLoadFailedBitmap(Bitmap loadFailedBitmap) {
-        this.loadFailedBitmap = loadFailedBitmap;
+    public void setLoadFailedDrawable(Drawable loadFailedDrawable) {
+        this.loadFailedDrawable = loadFailedDrawable;
     }
 
     public ImageLoadCallBack getImageLoadCallBack() {

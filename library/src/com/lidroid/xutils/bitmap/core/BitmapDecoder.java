@@ -28,10 +28,10 @@ public class BitmapDecoder {
     }
 
     public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight, Bitmap.Config config) {
-
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         options.inPurgeable = true;
+        options.inInputShareable = true;
         BitmapFactory.decodeResource(res, resId, options);
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
         options.inJustDecodeBounds = false;
@@ -40,7 +40,7 @@ public class BitmapDecoder {
         }
         try {
             return BitmapFactory.decodeResource(res, resId, options);
-        } catch (OutOfMemoryError e) {
+        } catch (Exception e) {
             LogUtils.e(e.getMessage(), e);
             return null;
         }
@@ -50,6 +50,7 @@ public class BitmapDecoder {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         options.inPurgeable = true;
+        options.inInputShareable = true;
         BitmapFactory.decodeFile(filename, options);
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
         options.inJustDecodeBounds = false;
@@ -58,17 +59,17 @@ public class BitmapDecoder {
         }
         try {
             return BitmapFactory.decodeFile(filename, options);
-        } catch (OutOfMemoryError e) {
+        } catch (Exception e) {
             LogUtils.e(e.getMessage(), e);
             return null;
         }
     }
 
     public static Bitmap decodeSampledBitmapFromDescriptor(FileDescriptor fileDescriptor, int reqWidth, int reqHeight, Bitmap.Config config) {
-
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         options.inPurgeable = true;
+        options.inInputShareable = true;
         BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
         options.inJustDecodeBounds = false;
@@ -77,17 +78,17 @@ public class BitmapDecoder {
         }
         try {
             return BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
-        } catch (OutOfMemoryError e) {
+        } catch (Exception e) {
             LogUtils.e(e.getMessage(), e);
             return null;
         }
     }
 
     public static Bitmap decodeSampledBitmapFromByteArray(byte[] data, int reqWidth, int reqHeight, Bitmap.Config config) {
-
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         options.inPurgeable = true;
+        options.inInputShareable = true;
         BitmapFactory.decodeByteArray(data, 0, data.length, options);
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
         options.inJustDecodeBounds = false;
@@ -96,7 +97,55 @@ public class BitmapDecoder {
         }
         try {
             return BitmapFactory.decodeByteArray(data, 0, data.length, options);
-        } catch (OutOfMemoryError e) {
+        } catch (Exception e) {
+            LogUtils.e(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public static Bitmap decodeResource(Resources res, int resId) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+        try {
+            return BitmapFactory.decodeResource(res, resId, options);
+        } catch (Exception e) {
+            LogUtils.e(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public static Bitmap decodeFile(String filename) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+        try {
+            return BitmapFactory.decodeFile(filename, options);
+        } catch (Exception e) {
+            LogUtils.e(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public static Bitmap decodeFileDescriptor(FileDescriptor fileDescriptor) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+        try {
+            return BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
+        } catch (Exception e) {
+            LogUtils.e(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public static Bitmap decodeByteArray(byte[] data) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+        try {
+            return BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        } catch (Exception e) {
             LogUtils.e(e.getMessage(), e);
             return null;
         }
