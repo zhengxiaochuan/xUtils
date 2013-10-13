@@ -16,9 +16,7 @@
 package com.lidroid.xutils;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
@@ -78,23 +76,23 @@ public class BitmapUtils {
 
     //////////////////////////////////////// config ////////////////////////////////////////////////////////////////////
 
-    public BitmapUtils configDefaultLoadingImage(Bitmap bitmap) {
-        defaultDisplayConfig.setLoadingBitmap(bitmap);
+    public BitmapUtils configDefaultLoadingImage(Drawable bitmap) {
+        defaultDisplayConfig.setLoadingDrawable(bitmap);
         return this;
     }
 
     public BitmapUtils configDefaultLoadingImage(int resId) {
-        defaultDisplayConfig.setLoadingBitmap(BitmapFactory.decodeResource(context.getResources(), resId));
+        defaultDisplayConfig.setLoadingDrawable(context.getResources().getDrawable(resId));
         return this;
     }
 
-    public BitmapUtils configDefaultLoadFailedImage(Bitmap bitmap) {
-        defaultDisplayConfig.setLoadFailedBitmap(bitmap);
+    public BitmapUtils configDefaultLoadFailedImage(Drawable bitmap) {
+        defaultDisplayConfig.setLoadFailedDrawable(bitmap);
         return this;
     }
 
     public BitmapUtils configDefaultLoadFailedImage(int resId) {
-        defaultDisplayConfig.setLoadFailedBitmap(BitmapFactory.decodeResource(context.getResources(), resId));
+        defaultDisplayConfig.setLoadFailedDrawable(context.getResources().getDrawable(resId));
         return this;
     }
 
@@ -184,7 +182,7 @@ public class BitmapUtils {
         }
 
         if (TextUtils.isEmpty(uri)) {
-            displayConfig.getImageLoadCallBack().loadFailed(imageView, displayConfig.getLoadFailedBitmap());
+            displayConfig.getImageLoadCallBack().loadFailed(imageView, displayConfig.getLoadFailedDrawable());
             return;
         }
 
@@ -199,8 +197,7 @@ public class BitmapUtils {
             final BitmapLoadTask loadTask = new BitmapLoadTask(imageView, displayConfig);
             // set loading image
             final AsyncBitmapDrawable asyncBitmapDrawable = new AsyncBitmapDrawable(
-                    context.getResources(),
-                    displayConfig.getLoadingBitmap(),
+                    displayConfig.getLoadingDrawable(),
                     loadTask);
             imageView.setImageDrawable(asyncBitmapDrawable);
 
@@ -305,17 +302,159 @@ public class BitmapUtils {
         return false;
     }
 
-    private class AsyncBitmapDrawable extends BitmapDrawable {
+    private class AsyncBitmapDrawable extends Drawable {
 
         private final WeakReference<BitmapLoadTask> bitmapLoadTaskReference;
 
-        public AsyncBitmapDrawable(Resources res, Bitmap bitmap, BitmapLoadTask bitmapWorkerTask) {
-            super(res, bitmap);
+        private Drawable baseDrawable;
+
+        public AsyncBitmapDrawable(Drawable drawable, BitmapLoadTask bitmapWorkerTask) {
+            baseDrawable = drawable;
             bitmapLoadTaskReference = new WeakReference<BitmapLoadTask>(bitmapWorkerTask);
         }
 
         public BitmapLoadTask getBitmapWorkerTask() {
             return bitmapLoadTaskReference.get();
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            baseDrawable.draw(canvas);
+        }
+
+        @Override
+        public void setAlpha(int i) {
+            baseDrawable.setAlpha(i);
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) {
+            baseDrawable.setColorFilter(colorFilter);
+        }
+
+        @Override
+        public int getOpacity() {
+            return baseDrawable.getOpacity();
+        }
+
+        @Override
+        public void setBounds(int left, int top, int right, int bottom) {
+            baseDrawable.setBounds(left, top, right, bottom);
+        }
+
+        @Override
+        public void setBounds(Rect bounds) {
+            baseDrawable.setBounds(bounds);
+        }
+
+        @Override
+        public void setChangingConfigurations(int configs) {
+            baseDrawable.setChangingConfigurations(configs);
+        }
+
+        @Override
+        public int getChangingConfigurations() {
+            return baseDrawable.getChangingConfigurations();
+        }
+
+        @Override
+        public void setDither(boolean dither) {
+            baseDrawable.setDither(dither);
+        }
+
+        @Override
+        public void setFilterBitmap(boolean filter) {
+            baseDrawable.setFilterBitmap(filter);
+        }
+
+        @Override
+        public void invalidateSelf() {
+            baseDrawable.invalidateSelf();
+        }
+
+        @Override
+        public void scheduleSelf(Runnable what, long when) {
+            baseDrawable.scheduleSelf(what, when);
+        }
+
+        @Override
+        public void unscheduleSelf(Runnable what) {
+            baseDrawable.unscheduleSelf(what);
+        }
+
+        @Override
+        public void setColorFilter(int color, PorterDuff.Mode mode) {
+            baseDrawable.setColorFilter(color, mode);
+        }
+
+        @Override
+        public void clearColorFilter() {
+            baseDrawable.clearColorFilter();
+        }
+
+        @Override
+        public boolean isStateful() {
+            return baseDrawable.isStateful();
+        }
+
+        @Override
+        public boolean setState(int[] stateSet) {
+            return baseDrawable.setState(stateSet);
+        }
+
+        @Override
+        public int[] getState() {
+            return baseDrawable.getState();
+        }
+
+        @Override
+        public Drawable getCurrent() {
+            return baseDrawable.getCurrent();
+        }
+
+        @Override
+        public boolean setVisible(boolean visible, boolean restart) {
+            return baseDrawable.setVisible(visible, restart);
+        }
+
+        @Override
+        public Region getTransparentRegion() {
+            return baseDrawable.getTransparentRegion();
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return baseDrawable.getIntrinsicWidth();
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            return baseDrawable.getIntrinsicHeight();
+        }
+
+        @Override
+        public int getMinimumWidth() {
+            return baseDrawable.getMinimumWidth();
+        }
+
+        @Override
+        public int getMinimumHeight() {
+            return baseDrawable.getMinimumHeight();
+        }
+
+        @Override
+        public boolean getPadding(Rect padding) {
+            return baseDrawable.getPadding(padding);
+        }
+
+        @Override
+        public Drawable mutate() {
+            return baseDrawable.mutate();
+        }
+
+        @Override
+        public ConstantState getConstantState() {
+            return baseDrawable.getConstantState();
         }
     }
 
@@ -365,9 +504,9 @@ public class BitmapUtils {
             final ImageView imageView = this.getTargetImageView();
             if (imageView != null) {
                 if (bitmap != null) {
-                    displayConfig.getImageLoadCallBack().loadCompleted(imageView, bitmap, displayConfig);
+                    displayConfig.getImageLoadCallBack().loadCompleted(imageView, new BitmapDrawable(bitmap), displayConfig);
                 } else {
-                    displayConfig.getImageLoadCallBack().loadFailed(imageView, displayConfig.getLoadFailedBitmap());
+                    displayConfig.getImageLoadCallBack().loadFailed(imageView, displayConfig.getLoadFailedDrawable());
                 }
             }
         }

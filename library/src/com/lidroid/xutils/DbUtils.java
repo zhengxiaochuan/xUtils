@@ -149,7 +149,7 @@ public class DbUtils {
         }
     }
 
-    public void saveOrUpdate(List<Object> entities) throws DbException {
+    public void saveOrUpdateAll(List<?> entities) throws DbException {
         try {
             beginTransaction();
 
@@ -175,7 +175,7 @@ public class DbUtils {
         }
     }
 
-    public void replace(List<Object> entities) throws DbException {
+    public void replaceAll(List<?> entities) throws DbException {
         try {
             beginTransaction();
 
@@ -201,7 +201,7 @@ public class DbUtils {
         }
     }
 
-    public void save(List<Object> entities) throws DbException {
+    public void saveAll(List<?> entities) throws DbException {
         try {
             beginTransaction();
 
@@ -229,7 +229,7 @@ public class DbUtils {
         return result;
     }
 
-    public void saveBindingId(List<Object> entities) throws DbException {
+    public void saveBindingIdAll(List<?> entities) throws DbException {
         try {
             beginTransaction();
 
@@ -259,7 +259,7 @@ public class DbUtils {
         }
     }
 
-    public void delete(List<Object> entities) throws DbException {
+    public void deleteAll(List<?> entities) throws DbException {
         if (entities == null || entities.size() < 1 || !tableIsExist(entities.get(0).getClass())) return;
         try {
             beginTransaction();
@@ -314,7 +314,7 @@ public class DbUtils {
         }
     }
 
-    public void update(List<Object> entities) throws DbException {
+    public void updateAll(List<?> entities) throws DbException {
         if (entities == null || entities.size() < 1 || !tableIsExist(entities.get(0).getClass())) return;
         try {
             beginTransaction();
@@ -795,7 +795,6 @@ public class DbUtils {
             cache.put(sql, result);
         }
 
-        @SuppressWarnings("unchecked")
         public Object get(String sql) {
             return cache.get(sql);
         }

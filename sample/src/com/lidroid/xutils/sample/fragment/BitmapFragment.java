@@ -1,12 +1,14 @@
 package com.lidroid.xutils.sample.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -16,8 +18,10 @@ import com.lidroid.xutils.ViewUtils;
 import com.lidroid.xutils.bitmap.PauseOnScrollListener;
 import com.lidroid.xutils.http.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
+import com.lidroid.xutils.sample.ImageActivity;
 import com.lidroid.xutils.sample.R;
 import com.lidroid.xutils.view.annotation.ViewInject;
+import com.lidroid.xutils.view.annotation.event.OnItemClick;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +35,8 @@ import java.util.regex.Pattern;
  */
 public class BitmapFragment extends Fragment {
 
-    private BitmapUtils bitmapUtils;
+    public static BitmapUtils bitmapUtils;
+
     private String[] imgSites = {
             "http://image.baidu.com/",
             "http://www.22mm.cc/",
@@ -53,8 +58,6 @@ public class BitmapFragment extends Fragment {
         //bitmapUtils.configDefaultBitmapMaxWidth(200);
         //bitmapUtils.configDefaultBitmapMaxHeight(200);
 
-        ////bitmapUtils.configDefaultShowOriginal(true);// 显示原始图片，不压缩。
-
         // 滑动时加载图片，快速滑动时不加载图片
         imageListView.setOnScrollListener(new PauseOnScrollListener(bitmapUtils, false, true));
         imageListAdapter = new ImageListAdapter(this.getActivity());
@@ -66,7 +69,19 @@ public class BitmapFragment extends Fragment {
             loadImgList(url);
         }
 
+        /*for (int i = 0; i < 162; i++) {
+            imageListAdapter.addSrc("/sdcard/pic/" + i);
+        }
+        imageListAdapter.notifyDataSetChanged();//通知listview更新数据*/
+
         return view;
+    }
+
+    @OnItemClick(R.id.img_list)
+    public void onImageItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Intent intent = new Intent(this.getActivity(), ImageActivity.class);
+        intent.putExtra("url", imageListAdapter.getItem(position).toString());
+        this.getActivity().startActivity(intent);
     }
 
     private void loadImgList(String url) {
@@ -83,7 +98,7 @@ public class BitmapFragment extends Fragment {
     @ViewInject(R.id.img_list)
     private ListView imageListView;
 
-    ImageListAdapter imageListAdapter;
+    private ImageListAdapter imageListAdapter;
 
     private class ImageListAdapter extends BaseAdapter {
 
@@ -100,6 +115,10 @@ public class BitmapFragment extends Fragment {
             this.imgSrcList.addAll(imgSrcList);
         }
 
+        public void addSrc(String imgUrl) {
+            this.imgSrcList.add(imgUrl);
+        }
+
         @Override
         public int getCount() {
             return imgSrcList.size();
@@ -107,7 +126,7 @@ public class BitmapFragment extends Fragment {
 
         @Override
         public Object getItem(int position) {
-            return position;
+            return imgSrcList.get(position);
         }
 
         @Override
@@ -119,6 +138,8 @@ public class BitmapFragment extends Fragment {
         public View getView(final int position, View view, ViewGroup parent) {
             if (view == null) {
                 view = new ImageView(this.context);
+                view.setMinimumWidth(150);
+                view.setMinimumHeight(150);
             }
             bitmapUtils.display((ImageView) view, imgSrcList.get(position));
             //bitmapUtils.display((ImageView) view, imgSrcList.get(position), displayConfig);
@@ -133,11 +154,12 @@ public class BitmapFragment extends Fragment {
     public static List<String> getImgSrcList(String htmlStr) {
         List<String> pics = new ArrayList<String>();
 
-        String regEx_img = "<img.*?src=\"(.*?)\""; // 图片链接地址
+        String regEx_img = "<img.*?src=\"http://(.*?).jpg\""; // 图片链接地址
         Pattern p_image = Pattern.compile(regEx_img, Pattern.CASE_INSENSITIVE);
         Matcher m_image = p_image.matcher(htmlStr);
         while (m_image.find()) {
-            pics.add(m_image.group(1));
+            String src = m_image.group(1);
+            pics.add("http://" + src + ".jpg");
         }
         return pics;
     }
